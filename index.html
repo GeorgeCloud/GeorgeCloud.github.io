@@ -11,72 +11,101 @@
   <link rel="stylesheet" type="text/css" href="styles/layout.css">
   <link rel="stylesheet" type="text/css" href="styles/module.css">
   <link rel="stylesheet" type="text/css" href="styles/icons/style.css">
+  <link rel="stylesheet" type="text/css" href="styles/hamburger.css">
   <title>Elevation Info</title>
 
-<script id="results-template" type="text/x-handlebars-template">
-  <button class="accordion"><h1>{{name}}</h1>
-  <label>Distance to location: {{distance}}</button>
-  <div class="panel">
-    <div><img class="search-img" src="{{imgUrl}}"></div>
-    <div><span class="icon-office"></span><h2> {{address}}</h2></div>
-    <div><span class="icon-arrow-up-right2"></span><h2> The elevation difference is: {{elevationcomp}} feet</h2></div>
-    <div><span class="last-div icon-bullhorn"></span><h2> Rating: {{rating}}</h2></div>
-  </div>
-</script>
+  <script id="results-template" type="text/x-handlebars-template">
+
+    <button class="accordion"><h1>{{name}}</h1>
+  <label class="section-name">Distance to location: {{equivdist}} Miles</label></button>
+    <div class="panel">
+      <div><img class="search-img" src="{{imgUrl}}"></div>
+      <div class="line-info"><span class="icon-office"></span><a href="https://www.google.com/maps/?q={{address}}">{{address}}</a></div>
+      <div class="line-info"><span class="icon-arrow-up-right2"></span>
+        <h2> The elevation difference is: {{elevationcomp}} feet</h2></div>
+      <div class="line-info"><span class="last-div icon-bullhorn"></span>
+        <h2> Rating: {{rating}}</h2></div>
+    </div>
+  </script>
 
 </head>
 
+<header>
+  <section class="header-bar">
+    <div class="logo-area">
+      <img id="logo" src="img/FINAL1.jpeg">
+    </div>
+    <div id="saying">
+      <h4>Elevate your search!</h4>
+    </div>
+  </section>
+
+  <div class="bg-cover" class="none"></div>
+
+    <a class="hamburger-shell">
+      <div class="hamb top menu"></div>
+      <div class="hamb middle"></div>
+      <div class="menu-name">MENU</div>
+      <ul id="menu">
+        <a class="home">
+          <li>Home</li>
+        </a>
+        <a class="searchHistory">
+          <li>Past Search</li>
+        </a>
+        <a class="about">
+          <li>About Us</li>
+        </a>
+      </ul>
+    </a>
+
+</header>
+
 <body>
 
-  <header>
-    <!-- <nav>
-      <input type="checkbox" id="css-toggle-menu" name="css-toggle-menu">
-      <ul class="main">
-        <li><a href="">Home</a></li>
-        <li><a href="">Services</a></li>
-        <li><a href="">Contact</a></li>
-      </ul>
-      <label for="css-toggle-menu" id="css-toggle-menu"></label>
-    </nav>
-  </header> -->
 
-  <main class="main">
-    <h5 id="info">Hey! This is Eazy Walk here you can search for anything from a coffee shop to a small business to find the most efficient route.</h5>
+  <main class="main container">
+
+    <h5 id="info">Hey! This is Eazy Walk here you can search for anything from a coffee shop to a small business to find the most efficient route</h5>
     <form id="search-from">
-      <input id="search" placeholder="Search Here">
+      <input id="search" autocomplete="off" placeholder="Search Here">
       <button id="search-btn">Start your Search</button>
     </form>
 
   </main>
 
-  <div class="search-details">
+  <div id="searchHistory" class="container"></div>
+
+
+  <!-- for the loading image of pokemon -->
+  <div>
+    <img id="pokemon" class="container" src="img/loading.gif">
   </div>
-  <div id="pokemon">
-    <img src="http://a.top4top.net/p_1990j031.gif">
+
+  <!-- for search results -->
+<section>
+  <div class="search-details container">
+
   </div>
+
+  <!-- for side image at desktop view -->
+  <div>
+    <img id="side-image" class="container" src="img/rain.gif">
+  </div>
+</section>
+
+  <div class="us container" style="display:none"><img src="images/img_1.jpg" class="us">HHGS - Just ONE initial away from being famous!</div>
 
   <!-- div for the map image -->
-  <div id="map"></div>
+  <div id="map" class="container"></div>
 
-  <!-- footer -->
-  <div class="footer"><p>
-    Heath, Hector, George and Sunitha <strong>For Final Project 301</strong>.</p>
-    <div class="icons">
-      
-      
-      <a href="#" target="_blank" class="fa fa-github"></a>
-      <a href="https://www.linkedin.com/in/george-c-43bb95118/" target="_blank" class="fa fa-linkedin"></a>
-      <a href="https://www.facebook.com/Georgi.eyebrow" target="_blank" class="fa fa-facebook"></a>
-      <a href="https://twitter.com/GeorgeBenioff" target="_blank" class="fa fa-twitter"></a>
-    </div>
-  </div>
 
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFvCBTC4gncWVqiOHfjbPWRQsmI9DXFP4&libraries=places"></script>
+  <script async defer src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCFvCBTC4gncWVqiOHfjbPWRQsmI9DXFP4&libraries=places"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
   <script type="text/javascript" src="views.js"></script>
+  <script type="text/javascript" src="map.js"></script>
   <script type="text/javascript" src="main.js"></script>
-
 </body>
 
 </html>
