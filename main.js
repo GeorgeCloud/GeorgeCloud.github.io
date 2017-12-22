@@ -6,29 +6,25 @@ let pos = {};
 let des = [];
 let elevPos = {};
 
+let searchHistory = '';
 let searchResults = [];
 
-function SearchResultsObject(name, add, dis, ele, rating, elecomp, imgUrl) {
+function SearchResultsObject(name, add, openh, dis, ele, rating, elecomp, imgUrl,ed) {
   this.name = name;
   this.address = add;
+  this.openhrs = openh
   this.distance = dis;
   this.elevation = ele;
   this.rating = rating;
   this.elevationcomp = elecomp;
   this.imgUrl = imgUrl;
+  this.equivdist = ed;
 }
-
-
+// this.distance + (7.92*this.elecomp)
 function initMap(e) {
   e.preventDefault();
-  map = new google.maps.Map(document.getElementById('map'), {
-    center: {
-      lat: 47.6182,
-      lng: -122.3519
-    },
-    zoom: 16
-  });
-  infoWindow = new google.maps.InfoWindow();
+
+  app.mapMake.mapCreate();
 
   // Try HTML5 geolocation.
   if (navigator.geolocation) {
@@ -38,8 +34,10 @@ function initMap(e) {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
-
+        // empty the handlebars and results
         searchResults = [];
+        $('.search-details').empty();
+
         var elevator = new google.maps.ElevationService;
         getElevationPos(elevator);
 
@@ -62,21 +60,14 @@ function initMap(e) {
           keyword: [$('#search').val()]// search by keyword
         };
 
-        // empty the handlebars and results
-        searchResults = [];
-        $('.search-details').empty();
-
-        // this is my current Location
-        let marker = new google.maps.Marker({
-          position: pos,
-          icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', // image,
-          animation: google.maps.Animation.DROP,
-          map: map
-        });
-        map.setCenter(pos);
+        // For every input log to History Tab
+        searchHistory += `${historyLog()}- ${$('#search').val()} <br> `;
 
         let service = new google.maps.places.PlacesService(map);
         service.nearbySearch(request, processResults);
+
+        // center map on current Location
+        centerMarker();
       },
       function() {
         handleLocationError(true, infoWindow, map.getCenter());
@@ -96,30 +87,36 @@ function processResults(results, status) {
         lat: results[i].geometry.location.lat(),
         lng: results[i].geometry.location.lng()
       })
-      searchResults.push(new SearchResultsObject(results[i].name, results[i].vicinity, 0, 0, results[i].rating,0));
-      if (!results[i].photos) {
-        searchResults[i].imgUrl = 'http://via.placeholder.com/350x150';
-      } else {
-        searchResults[i].imgUrl = results[i].photos[0].getUrl({maxWidth: 1000});
-      }
+      searchResults.push(new SearchResultsObject(results[i].name, results[i].vicinity, null, 0, 0, results[i].rating,0));
+      searchResults[i].imgUrl = (results[i].photos) ? results[i].photos[0].getUrl({maxWidth: 1000}) : 'img/error.gif';
+      searchResults[i].openhrs = (results[i].opening_hours) ? results[i].opening_hours : 'Not Available';
     }
     // console.log(results);
   }
-  var distance = new google.maps.DistanceMatrixService;
+  let distance = new google.maps.DistanceMatrixService;
   let statusD = distanceLocation(distance);
-  var elevator = new google.maps.ElevationService;
+  let elevator = new google.maps.ElevationService;
   let statusE = displayLocationElevation(elevator);
 
-  setTimeout(accordPopulate, 500);
+  setTimeout(equivdistCalc, 1000);
 }
 
-// creates the markers
+function centerMarker() {
+  let marker = new google.maps.Marker({
+    position: pos,
+    icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', // image,
+    animation: google.maps.Animation.DROP,
+    map: map
+  });
+  map.setCenter(pos);
+}
+
+// creates the markers and lets you click on the marker for more info
 function createMarker(place) {
   let marker = new google.maps.Marker({
     position: place.geometry.location,
     map: map
   });
-// this code lets you click on the marker for more info
   google.maps.event.addListener(marker, 'click', function() {
     infoWindow.setContent(place.name);
     infoWindow.open(map, this);
@@ -136,7 +133,7 @@ function distanceLocation(distance) {
       travelMode: google.maps.TravelMode.DRIVING,
       unitSystem: google.maps.UnitSystem.IMPERIAL,
     }, function(results, err){
-      searchResults[i].distance =  results.rows[0].elements[0].distance.text;
+      searchResults[i].distance =  Number((results.rows[0].elements[0].distance.text).substr(0,(results.rows[0].elements[0].distance.text).length-3));
       statusD = true;
     })
   }
@@ -155,9 +152,21 @@ function displayLocationElevation(elevator) {
       statusE = true;
     });
   }
-  console.log(searchResults);
+  return statusE;
 }
 
+function equivdistCalc() {
+  for (let i = 0; i < searchResults.length; i++) {
+    let naismith_ed = ((((searchResults[i].distance*1.6) + (7.92*(searchResults[i].elevationcomp*.3048/1000))))*0.62);
+    searchResults[i].equivdist = Number(naismith_ed.toPrecision(2));
+  }
+  searchResults.sort((a, b) => {
+    return a.equivdist - b.equivdist;
+  })
+  setTimeout(accordPopulate, 1000);
+  checkSearchResultIsNone();
+  historyLog();
+}
 // this functions tell you if you are allowed the GPS to be accessed.
 function handleLocationError(browserHasGeolocation, infoWindow, pos) {
   infoWindow.setPosition(pos);
@@ -165,4 +174,16 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
     'Error: The Geolocation service failed.' :
     'Error: Your browser doesn\'t support geolocation.');
   infoWindow.open(map);
+
+}
+
+function checkSearchResultIsNone(){
+  if (searchResults.length === 0){
+    alert('Outside of walking distance.');
+  }
+}
+
+function historyLog(){
+  let now = Date().split(' ').slice(0, 5).join(' ');
+  return now;
 }
